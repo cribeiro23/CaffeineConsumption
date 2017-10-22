@@ -48,13 +48,9 @@ public class DrankPage extends AppCompatActivity {
         drinkHolder.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         drinkSpinners.setAdapter(drinkHolder);
 
-        Map<String, Integer> caffeineTable = new HashMap<>();
-        caffeineTable.put("Red Bull", 80);
-        caffeineTable.put("Rockstar", 160);
-        caffeineTable.put("5 Hour Energy", 200);
-        caffeineTable.put("Monster", 160);
-        caffeineTable.put("Coffee", 160);
-        caffeineTable.put("Expresso", 80);
+        Intent readIntent = getIntent();
+        final String api = readIntent.getStringExtra("API");
+        final String kgWeight = readIntent.getStringExtra("kgWeight");
 
         final Intent toMain = new Intent(DrankPage.this, MainActivity.class);
         final Bundle toMainBundle = new Bundle();
@@ -73,6 +69,8 @@ public class DrankPage extends AppCompatActivity {
                 toMain.putExtra("CaffeineType", drinkSpinners.getSelectedItem().toString());
                 toMain.putExtra("Hour", hour);
                 toMain.putExtra("Minute", minute);
+                toMain.putExtra("API", api);
+                toMain.putExtra("kgWeight", kgWeight);
                 startActivity(toMain);
             }
         });

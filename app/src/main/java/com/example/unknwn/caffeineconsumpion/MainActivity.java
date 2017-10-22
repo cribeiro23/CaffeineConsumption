@@ -3,6 +3,8 @@ package com.example.unknwn.caffeineconsumpion;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
     private long fileSize = 0;
 
-    private TextView debugField;
 
     Future<Integer> futurePhenoMeta;
     @Override
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Person person1 = new Person("Test", "GENOMELINKTEST", 60);
         final AlertDialog.Builder caffineAlert = new AlertDialog.Builder(this);
-        final Person person1 = new Person("Test","GENOMELINKTEST", 50);
         //Get Globals from phenotype data
 
         //Gets Intent data from whatever prior activity
@@ -61,15 +61,55 @@ public class MainActivity extends AppCompatActivity {
 
         progressBarTester = (ProgressBar) findViewById(R.id.progressBar);
         countDownText = (TextView) findViewById(R.id.countDownText);
-        debugField = (TextView) findViewById(R.id.debug);
         totalConsumedCaffeine = (TextView) findViewById(R.id.totalConsumedCaffeine);
-
+;
         //Pulls prior intent data
+        final String api = readIntent.getStringExtra("API");
+        final int kgWeight = Integer.parseInt(readIntent.getStringExtra("kgWeight"));
         caffeineDrank = readIntent.getStringExtra("CaffeineType");
         pulledHour = Integer.parseInt(readIntent.getStringExtra("Hour"));
         pulledMinute = Integer.parseInt(readIntent.getStringExtra("Minute"));
         int pulledCombine = (pulledHour * 3600) + (pulledMinute * 60);
+        String deviceName = android.os.Build.MODEL;
 
+        String[] material = new String[2];
+        material[0] = api;
+        material[1] = Integer.toString(kgWeight);
+
+
+        FileHandling.writeToFile(material[0],this);
+        FileHandling.writeToFile(material[1],this);
+
+        Log.i("MainActivity",FileHandling.readFromFile(this));
+
+        final Person person1 = new Person(deviceName, api, kgWeight);
+
+        DatabaseHandler db = null;
+        try {
+
+            db= new DatabaseHandler(this);
+            db.addPerson(person1);
+            int weight = db.getWeight(person1.getName());
+            Log.i("MainActivity",Integer.toString(weight));
+            boolean hasUsed = db.getLaunched( person1.getName() );
+            Log.i("MainActivity",Boolean.toString(hasUsed) );
+            String apikey = db.getApiKey( person1.getName() );
+            Log.i("MainActivity",apikey);
+
+            // Uncomment code below to deleter person from database
+
+            /*
+
+            db = new DatabaseHandler(this);
+            db.deletePerson(person1);
+
+            */
+        }
+
+        catch( Exception e ) {
+            Log.e("MainActivity", "Error message: " + e);
+            e.printStackTrace();
+        }
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -104,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         //consumedCaffeine = person1.getConsumedCaff();
 
-        debugField.setText(Double.toString(userMult));
 
         //Map to figure out how caffeine was taken in
         Map<String, Integer> caffeineTable = new HashMap<>();
@@ -117,10 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
         int consumedCaffeine = person1.getConsumedCaff();
         caffeineAmount = caffeineTable.get(caffeineDrank);
-        debugField.setText(Integer.toString(caffeineAmount));
         consumedCaffeine = consumedCaffeine + caffeineAmount;
-        debugField.setText(Integer.toString(consumedCaffeine));
-        // debugField.setText(Integer.toString(person1.getConsumedCaff()));
         person1.setConsumedCaff(consumedCaffeine);
 
         // person1.addConsumedCaff(caffeineAmount);
@@ -130,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
         metabolismRate = caffeineAmount / 4;
         metabolismRate = (int) (metabolismRate * userMult);
+
 
         //Keep caffeineLevels above 40 mg
         Calendar currDT = Calendar.getInstance();
@@ -145,15 +182,18 @@ public class MainActivity extends AppCompatActivity {
             caffineValueDrank = caffineValueDrank - subtractCombined;
         }
 
+        caffineValueDrank = (int) (caffineValueDrank + person1.getLeftoverTime());
 
         double tempConsum = (double) consumedCaffeine;
         double tempCaffVal = (double) userCaffineValue;
         double percentDaily = tempConsum / tempCaffVal;
-        //debugField.setText(Double.toString(percentDaily));
+
+
+
         if (percentDaily > 0.75) {
             AlertDialog.Builder caffAlert  = caffineAlert;
-            caffAlert.setMessage("You are approaching your daily caffeine consumption, perhaps you" +
-                    " should reconsider this drink?");
+            caffAlert.setMessage("You are approaching your daily caffeine consumption, consider your" +
+                    " next drink as your last.");
             caffAlert.setTitle("Caffeine Consumption");
             caffAlert.setPositiveButton("Ok",
                     new DialogInterface.OnClickListener() {
@@ -170,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 while (progressBarStatus < caffineValueDrank) {
                     progressBarStatus++;
-                    android.os.SystemClock.sleep(1000);
+                    android.os.SystemClock.sleep(500);
                     progressBarHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -181,9 +221,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
+        final Intent addDrink = new Intent(MainActivity.this, AddToMainDrinks.class);
+
         new CountDownTimer(caffineValueDrank*1000,1000) {
             public void onTick(long millisUntilFinished) {
                 long timeLeft = millisUntilFinished / 1000;
+                person1.setLeftoverTime(timeLeft);
                 long hours = timeLeft / 3600;
                 long minutes = (timeLeft % 3600) /60;
                 long seconds = timeLeft % 60;
@@ -200,21 +243,11 @@ public class MainActivity extends AppCompatActivity {
         drinkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*if (percentDaily >= .5) {
-                    AlertDialog.Builder caffAlert = caffineAlert;
-                    caffAlert.setMessage("You are approaching your daily caffeine consumption, perhaps you" +
-                            " should reconsider this drink?");
-                    caffAlert.setTitle("Caffeine Consumption");
-                    caffAlert.setPositiveButton("Ok",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //dismiss the dialog
-                                }
-                            });
-                    caffAlert.setCancelable(true);
-                    caffAlert.create().show();
-                }*/
-                startActivity(new Intent(MainActivity.this, AddToMainDrinks.class));
+                String apiCall = api.toString();
+                String tWeight = Integer.toString(kgWeight);
+                addDrink.putExtra("API", apiCall);
+                addDrink.putExtra("kgWeight", tWeight);
+                startActivity(addDrink);
             }
         });
     }

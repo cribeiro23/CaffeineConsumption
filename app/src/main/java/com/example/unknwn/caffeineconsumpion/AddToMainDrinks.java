@@ -37,6 +37,10 @@ public class AddToMainDrinks extends AppCompatActivity {
         drinkHolder.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         drinksSpinner.setAdapter(drinkHolder);
 
+        Intent readInent = getIntent();
+        final String api = readInent.getStringExtra("API");
+        final int kgWeight = Integer.parseInt(readInent.getStringExtra("kgWeight"));
+
         final Intent backToMain = new Intent(this, MainActivity.class);
 
 
@@ -55,6 +59,8 @@ public class AddToMainDrinks extends AppCompatActivity {
                 backToMain.putExtra("CaffeineType", drinksSpinner.getSelectedItem().toString());
                 backToMain.putExtra("Hour", "0");
                 backToMain.putExtra("Minute", "0");
+                backToMain.putExtra("API", api);
+                backToMain.putExtra("kgWeight", Integer.toString(kgWeight));
                 startActivity(backToMain);
             }
         });

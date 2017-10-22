@@ -30,6 +30,7 @@ public class Person extends Application {
     private double multiplier;
     private volatile int caffeineMeta;
     private volatile int caffeineResistance;
+	private static long leftoverTime;
 
 	public Person() {
 	}
@@ -60,7 +61,24 @@ public class Person extends Application {
 		//setUserWeight(weight);
 
 	}
-	
+
+	/**
+	 * Setter for leftover time
+	 * @param time sets to whatever time is
+	 */
+
+	public void setLeftoverTime(long time) {
+		leftoverTime = time;
+	}
+
+	/**
+	 * Gets leftover time
+	 * @return leftoverTime
+	 */
+	public long getLeftoverTime() {
+		return leftoverTime;
+	}
+
 	/**
 	 * Setter for apikey
 	 * @param apikey
@@ -269,6 +287,28 @@ public class Person extends Application {
         }
     }
 
+
+
+    /**
+	 * Getter for hasLaunched boolean variable
+     */
+   // public boolean getHasLaunched() {
+	//	return hasLaunched;
+	//}
+
+	/**
+	 * Setter for hasLaunched boolean variable
+	 */
+//	public void setLaunched() {
+//		hasLaunched = true;
+//	}
+
+	/**
+	 * Getter for person's name
+	 */
+	public String getName() {
+		return name;
+	}
 
 }
 

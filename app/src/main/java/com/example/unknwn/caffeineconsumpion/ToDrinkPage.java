@@ -3,6 +3,7 @@ package com.example.unknwn.caffeineconsumpion;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,8 +36,12 @@ public class ToDrinkPage extends AppCompatActivity {
         drinksHolder.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         drinkSpinners.setAdapter(drinksHolder);
 
+        Intent readIntent = getIntent();
+        final String api = readIntent.getStringExtra("API");
+        final String kgWeight = readIntent.getStringExtra("kgWeight");
         final Intent toMain = new Intent(ToDrinkPage.this, MainActivity.class);
         final Bundle toMainBundle = new Bundle();
+        Log.i("ToDrinkPage", api + " " + kgWeight);
 
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,6 +49,8 @@ public class ToDrinkPage extends AppCompatActivity {
                 toMain.putExtra("CaffeineType", drinkSpinners.getSelectedItem().toString());
                 toMain.putExtra("Hour", "0");
                 toMain.putExtra("Minute", "0");
+                toMain.putExtra("API", api);
+                toMain.putExtra("kgWeight", kgWeight);
                 startActivity(toMain);
             }
         });
