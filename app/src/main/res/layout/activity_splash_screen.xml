@@ -6,4 +6,20 @@
     android:layout_height="match_parent"
     tools:context="com.example.unknwn.caffeineconsumpion.SplashScreen">
 
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="327dp"
+        android:layout_height="98dp"
+        android:text="Need a Fix?"
+        android:textSize="48dp"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="48dp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="175dp"
+        android:layout_height="115dp"
+        android:text="Enter"
+        tools:layout_editor_absoluteX="105dp"
+        tools:layout_editor_absoluteY="198dp" />
 </android.support.constraint.ConstraintLayout>

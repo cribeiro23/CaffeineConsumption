@@ -1,6 +1,26 @@
-package rand;
+package com.example.unknwn.caffeineconsumpion;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+
 
 public class DatabaseHandler extends SQLiteOpenHelper {
+
+
+	/*public void onUpgrade(SQLiteDatabase db ,int old, int new) {
+		db.execSQL("Stuff" + USER_TABLE);
+
+		onCreate(db);
+	}*/
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
+		onCreate(db);
+	}
 
 	// All Static variables
 	// Database Version
@@ -31,15 +51,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	//addContact
-	()
     // Adding new contact
 	public void addContact(Person person) {
 	    SQLiteDatabase db = this.getWritableDatabase();
 	 
 	    ContentValues values = new ContentValues();
-	    values.put(KEY_WEIGHT, person.getWeight()); // Adding weight
-	    values.put(KEY_CAFFEINEMETABOLITE, person.getcaffeineMeta() ); // Adding caffeine metabolite
-	    values.put(KEY_CAFFEINETOLERANCE, person.getcaffeineRes() );
+	    values.put(KEY_WEIGHT, person.getUserWeight()); // Adding weight
+	    values.put(KEY_CAFFEINEMETABOLITE, person.getCaffeineMeta() ); // Adding caffeine metabolite
+	    values.put(KEY_CAFFEINETOLERANCE, person.getCaffeineRes() );
 	 
 	    // Inserting Row
 	    db.insert(USER_TABLE, null, values);

@@ -17,6 +17,7 @@ public class ToDrinkPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_drink_page);
+
         Button mainButton = (Button)findViewById(R.id.mainButton);
         final Spinner drinkSpinners = (Spinner) findViewById(R.id.drinksSpinner);
         ArrayAdapter<String> drinksHolder;
