@@ -1,5 +1,6 @@
 package rand;
 
+// import android.app.Application;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,41 +10,85 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-
 import javax.net.ssl.HttpsURLConnection;
-import java.util.ArrayList; 
 
 
-public class Person {
-	private int dailyAmount;
-	private int phenotypeScore;
-	private String apiKey;
-	private String name;
-	
-	// Defining constats
-	private static final int SCORE_0_AMOUNT = 300;
-	private static final int SCORE_1_AMOUNT = 350;
-	private static final int SCORE_2_AMOUNT = 400;
-	private static final int SCORE_3_AMOUNT = 450;
-	private static final int SCORE_4_AMOUNT = 500;
-	private static final int WARNING_AMOUNT = 100;
-	
-	
+/**
+ * Created by UNKNWN on 10/21/2017.
+ */
+
+public class Person extends Application {
+
+    private String apikey;
+    private String name;
+    private int consumedCaff = 0;
+    private int userWeight = 50;
+    private int mgCaffeine = userWeight * 6;
+    private double multiplier;
+    private int caffeineMeta;
+    private int caffeineResistance;
+    
 	/**
 	 * Constructor to initialize a person object, set their name and key
 	 * @param name the person's name
 	 * @param apiKey the person's apikey
 	 */
-	public Person(String name, String apiKey ) {
+	public Person(String name, String apiKey, int weight) {
 		setName(name);
 		setKey(apiKey);
+		setUserWeight(weight);
+		
+		// Generating phenotype information based on key
+		caffeineMeta = getphenoType( "caffeine-metabolite-ratio","european");
+		caffeineResistance = getphenoType( "caffeine-consumption","european");
+		
+		// Setting multiplier
+		setMultiplier(caffeineMeta);
+		
+		// Setting daily caffeine intake
+		setmgCaffeine(caffeineResistance);
+		
+		
 	}
 	
 	/**
-	 * This method uses the genomelink API to get the phenotype score
-	 * from the user
+	 * Setter for apikey
+	 * @param apikey
 	 */
-	public void setScore(String phenotype, String continent) throws IOException {
+	public void setKey( String apikey ) {
+		this.apikey = apikey;
+	}
+	
+	/**
+	 * Setter for name
+	 * @param name
+	 */
+	public void setName( String name )
+	{
+		this.name = name;
+	}
+	
+	/**
+	 * Getter for apikey
+	 * @return
+	 */
+	public String getKey() {
+		return apikey;
+	}
+
+    public int getConsumedCaff() {
+        return consumedCaff;
+    }
+
+    public void setConsumedCaff(int caffeine) {
+        consumedCaff = caffeine;
+    }
+
+     /**
+      * Method to make http request to get phenotype data
+	 * for caffeine metabolic rate
+      */
+    public int getphenoType(String phenotype, String continent) throws IOException {
 		String query = continent;
 		String url = null;
 		String header = "Bearer " + getKey(); 
@@ -92,98 +137,73 @@ public class Person {
 		}
 				
 		int score = Character.getNumericValue(scoreString.charAt(scoreString.length() - 1));
-		phenotypeScore = score;
-		
-	}
-		
-		
-	/**
-	 * Method to set the person's API key
-	 */
-	public void setKey(String key) {
-		this.apiKey = key;
-	}
-	
-	/**
-	 * Method to set person's name
-	 */
-	public void setName( String name ) {
-		this.name = name;
-	}
-	
-	/**
-	 * Method to access the person's API key
-	 * @return apiKey, the person's API key
-	 */
-	public String getKey() {
-		return apiKey;
-	}
-	
-	/**
-	 * Method to return person's phenotype score
-	 */
-	public int getScore() {
-		return phenotypeScore;
-	}
-	
-	/**
-	 * This method establishes the person's daily amount based on their 
-	 * phenotype score
-	 */
-	public void setDailyAmount() {
-		switch( phenotypeScore ) {
-			case 0:
-				dailyAmount = SCORE_0_AMOUNT;
-				break;
-			case 1:
-				dailyAmount = SCORE_1_AMOUNT;
-				break;
-			case 2:
-				dailyAmount = SCORE_2_AMOUNT;
-				break;
-			case 3:
-				dailyAmount = SCORE_3_AMOUNT;
-				break;
-			case 4:
-				dailyAmount = SCORE_4_AMOUNT;
-				break;
-			default:
-				System.out.println("Invalid phenotype score!");
-			
-		}
-	}
-	
-	/**
-	 * This method gets the person recommended caffeine amount
-	 * @return the person's amount
-	 */
-	public int getDailyAmount() {
-		return dailyAmount;		
-	}
-	
-	/**
-	 * This method adjusts the remaining dailyAmount after a certain
-	 * amount of caffeine is consumed
-	 * @param caffeineconsumed the amount consumed
-	 */
-	public void deductCaffeine(int caffeineconsumed ) {
-		dailyAmount -= caffeineconsumed;
-		
-		if ( dailyAmount <= 0 ) {
-			System.out.println("You have exceeded recommended daily"
-					            + " ammount of caffeine. It is highly recommended"
-					            + " that you stop your consumption for today");
-		}
-		else if ( dailyAmount <= WARNING_AMOUNT ) {
-			System.out.println("You have almost consumed all of your" +
-								" recommended daily amount! Your next caffeine"
-								+ " drink should be your last");
-		}
-	}
-	
-
-		
+		return score;
 		
 	}
 
+
+    public void addConsumedCaff(int caffeine) {
+        consumedCaff = consumedCaff + caffeine;
+    }
+
+    public int getUserWeight() {
+        return userWeight;
+    }
+
+    public void setUserWeight(int weight) {
+        userWeight = weight;
+    }
+
+    public int getmgCaffeine() {
+        return mgCaffeine;
+    }
+
+    public void setmgCaffeine(int phenotype) {
+        switch (phenotype) {
+            case 0: mgCaffeine = (int) (mgCaffeine * .75);
+                break;
+            case 1: mgCaffeine = (int)(mgCaffeine * .875);
+                break;
+            case 2: mgCaffeine = (int) (mgCaffeine);
+                break;
+            case 3: mgCaffeine = (int) (mgCaffeine * 1.25);
+                break;
+            case 4: mgCaffeine = (int) (mgCaffeine * 1.5);
+                break;
+            default: mgCaffeine = 400;
+        }
+    }
+
+    /**
+     * Getter for caffeinemeta phenotype
+     * @return
+     */
+    public int getCaffeineMeta() {
+        return caffeineMeta;
+    }
+    
+    /**
+     * Getter for caffeineResistance phenotype
+     * @param phenotype
+     */
+    public int getCaffeineRes() {
+    	return caffeineResistance;
+    }
+
+    public void setMultiplier(int phenotype) {
+        switch (phenotype) {
+            case 0: multiplier = .6;
+                break;
+            case 1: multiplier = .8;
+                break;
+            case 2: multiplier = 1;
+                break;
+            case 3: multiplier = 1.25;
+                break;
+            case 4: multiplier = 1.5;
+                break;
+            default: multiplier = 1;
+        }
+    }
+}
 
